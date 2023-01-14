@@ -19,8 +19,6 @@ services:
       driver: none
     ports:
       - 2181:2181
-    networks:
-      - kafka-txs
   kafka:
     build:
       context: .
@@ -32,8 +30,6 @@ services:
       - 9092:9092
     depends_on:
       - zookeeper
-    networks:
-      - kafka-txs
   sync-simple-1:
     build:
       context: .
@@ -44,8 +40,6 @@ services:
       - env/sync-simple_1.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   sync-simple-2:
     build:
       context: .
@@ -56,8 +50,6 @@ services:
       - env/sync-simple_2.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   sync-multiple:
     build:
       context: .
@@ -68,8 +60,6 @@ services:
       - env/sync-multiple.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   sync-abort:
     build:
       context: .
@@ -80,8 +70,6 @@ services:
       - env/sync-abort.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   sync-abort-multiple:
     build:
       context: .
@@ -92,8 +80,6 @@ services:
       - env/sync-abort-multiple.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   async-simple:
     build:
       context: .
@@ -104,8 +90,6 @@ services:
       - env/async-simple.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   async-abort:
     build:
       context: .
@@ -116,8 +100,6 @@ services:
       - env/async-abort.env
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
   consumer:
     build:
       context: .
@@ -126,7 +108,3 @@ services:
         APPLICATION: consumer
     depends_on:
       - kafka
-    networks:
-      - kafka-txs
-networks:
-  kafka-txs:

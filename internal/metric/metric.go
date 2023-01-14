@@ -2,7 +2,6 @@ package metric
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -60,7 +59,7 @@ func IncMessagesConsumed(sender string, offset int64, partition int32) {
 	messagesConsumed.With(prometheus.Labels{
 		labelSender:    sender,
 		labelOffset:    fmt.Sprintf("%d", offset),
-		labelPartition: fmt.Sprintf("%t", partition),
+		labelPartition: fmt.Sprintf("%d", partition),
 	}).Inc()
 }
 
@@ -73,21 +72,8 @@ func (h *metricsHandler) Register(mux *http.ServeMux) {
 }
 
 func register() (err error) {
-	defer func() {
-		e := recover()
-		log.Printf("recovering from prometheus panic: %v\n", e)
-		err, ok := e.(error)
-		if ok {
-			err = fmt.Errorf("prometheus registration panicked: %w", err)
-			return
-		}
-		err = fmt.Errorf("unexpected prometheus panic error: %v", err)
-	}()
-
 	for _, c := range []prometheus.Collector{messagesSent, messagesConsumed} {
-		if err := prometheus.Register(c); err != nil {
-			return fmt.Errorf("unexpected error while registering metrics for: %w", err)
-		}
+		prometheus.MustRegister(c)
 	}
 
 	return nil

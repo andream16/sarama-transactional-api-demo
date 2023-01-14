@@ -100,11 +100,23 @@ services:
       - env/async-abort.env
     depends_on:
       - kafka
-  consumer:
+  consumer-committed-msgs:
     build:
       context: .
       dockerfile: dockerfiles/go/Dockerfile
       args:
         APPLICATION: consumer
+    env_file:
+      - env/consumer-committed-msgs.env
+    depends_on:
+      - kafka
+  consumer-all-msgs:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: consumer
+    env_file:
+      - env/consumer-all-msgs.env
     depends_on:
       - kafka

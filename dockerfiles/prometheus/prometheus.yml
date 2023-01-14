@@ -12,7 +12,8 @@ scrape_configs:
       - targets:
           - 'async-simple:8082'
           - 'async-abort:8082'
-          - 'consumer:8082'
+          - 'consumer-all-msgs:8082'
+          - 'consumer-committed-msgs:8082'
           - 'sync-abort:8082'
           - 'sync-abort-multiple:8082'
           - 'sync-multiple:8082'

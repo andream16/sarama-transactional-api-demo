@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/andream16/sarama-transactional-api-demo/internal/kafka"
@@ -58,20 +59,26 @@ func main() {
 	}
 
 	var (
-		metricsSrv = transporthttp.NewServer(":8082", metricsHandler)
-		config     = sarama.NewConfig()
+		metricsSrv             = transporthttp.NewServer(":8082", metricsHandler)
+		appName                = os.Getenv("TRANSACTION_ID")
+		shouldReadCommitted, _ = strconv.ParseBool(os.Getenv("READ_ONLY_COMMITTED"))
+		config                 = sarama.NewConfig()
 	)
 
-	config.ClientID = "consumer"
+	config.ClientID = appName
 	config.Version = sarama.V2_5_0_0
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.IsolationLevel = sarama.ReadCommitted
+	config.Consumer.IsolationLevel = sarama.ReadUncommitted
+
+	if shouldReadCommitted {
+		config.Consumer.IsolationLevel = sarama.ReadCommitted
+	}
 
 	client := kafka.NewClient(config)
 
 	defer client.Close()
 
-	consumer, err := sarama.NewConsumerGroupFromClient("kafka-consumer", client)
+	consumer, err := sarama.NewConsumerGroupFromClient(appName, client)
 	if err != nil {
 		log.Fatalf("could not create consumer: %v", err)
 	}

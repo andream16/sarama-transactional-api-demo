@@ -1,0 +1,132 @@
+version: '3.4'
+services:
+  prometheus:
+    build:
+      context: .
+      dockerfile: dockerfiles/prometheus/Dockerfile
+    ports:
+      - 9090:9090
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+  zookeeper:
+    build:
+      context: .
+      dockerfile: dockerfiles/zookeeper/Dockerfile
+    logging:
+      driver: none
+    ports:
+      - 2181:2181
+    networks:
+      - kafka-txs
+  kafka:
+    build:
+      context: .
+      dockerfile: dockerfiles/kafka/Dockerfile
+    hostname: kafka
+    env_file:
+      - env/kafka.env
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-txs
+  sync-simple-1:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: sync-simple
+    env_file:
+      - env/sync-simple_1.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  sync-simple-2:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: sync-simple
+    env_file:
+      - env/sync-simple_2.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  sync-multiple:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: sync-multiple
+    env_file:
+      - env/sync-multiple.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  sync-abort:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: sync-abort
+    env_file:
+      - env/sync-abort.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  sync-abort-multiple:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: sync-abort-multiple
+    env_file:
+      - env/sync-abort-multiple.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  async-simple:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: async-simple
+    env_file:
+      - env/async-simple.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  async-abort:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: async-abort
+    env_file:
+      - env/async-abort.env
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+  consumer:
+    build:
+      context: .
+      dockerfile: dockerfiles/go/Dockerfile
+      args:
+        APPLICATION: consumer
+    depends_on:
+      - kafka
+    networks:
+      - kafka-txs
+networks:
+  kafka-txs:
